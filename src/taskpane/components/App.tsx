@@ -7,6 +7,8 @@ import Progress from "./Progress";
 import "../../../assets/icon-16.png";
 import "../../../assets/icon-32.png";
 import "../../../assets/icon-80.png";
+// mgt
+import { Providers, ProviderState, SimpleProvider } from '@microsoft/mgt-react';
 
 export interface AppProps {
   title: string;
@@ -15,6 +17,7 @@ export interface AppProps {
 
 export interface AppState {
   listItems: HeroListItem[];
+  graphAccessToken: "";
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -22,10 +25,13 @@ export default class App extends React.Component<AppProps, AppState> {
     super(props, context);
     this.state = {
       listItems: [],
+      graphAccessToken: "",
     };
   }
 
   componentDidMount() {
+    this.initializeProvider();
+
     this.setState({
       listItems: [
         {
@@ -72,5 +78,20 @@ export default class App extends React.Component<AppProps, AppState> {
         </HeroList>
       </div>
     );
+  }
+
+  private async initializeProvider() {
+    try {
+      Providers.globalProvider = new SimpleProvider((_scopes: string[]) => {
+        return new Promise( (resolve) => {
+          resolve(this.state.graphAccessToken);
+       });
+      });
+ 
+      Providers.globalProvider.setState(ProviderState.SignedIn);
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 }
